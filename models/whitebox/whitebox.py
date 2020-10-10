@@ -26,6 +26,9 @@ class WhiteBoxRNN(LSTMClassifier, ABC):
         self._x_stoi = dataset.fields["x"].vocab.stoi
         self._y_stoi = dataset.fields["y"].vocab.stoi
 
+        self.x_field = dataset.fields["x"]
+        self.y_field = dataset.fields["y"]
+
         if set_params:
             self._set_params()
 
