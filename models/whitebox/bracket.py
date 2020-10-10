@@ -2,7 +2,7 @@ from typing import Tuple
 
 import numpy as np
 
-from data.loaders import load_bracket
+from datasets.loaders import load_bracket
 from models.whitebox.whitebox import WhiteBoxRNN
 
 Weights = Tuple[np.ndarray, np.ndarray, np.ndarray]
@@ -21,7 +21,7 @@ class BracketRNN(WhiteBoxRNN):
         :param m: The value used to saturate the gates
         """
         self._stack_size = stack_size
-        dataset = load_bracket(blank=True)
+        dataset = load_bracket()
         super(BracketRNN, self).__init__(dataset, 2 * stack_size + 2, m=m)
 
     @property

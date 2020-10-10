@@ -2,7 +2,7 @@ from typing import Tuple
 
 import numpy as np
 
-from data.loaders import load_sp
+from datasets.loaders import load_sp
 from models.whitebox.whitebox import WhiteBoxRNN, Weights
 from tools.fsa import FSA, sp_fsa
 
@@ -21,7 +21,7 @@ class SPRNN(WhiteBoxRNN):
         :param u: The value used to increment the counter
         """
         self.u = m if u is None else u
-        dataset = load_sp(blank=True)
+        dataset = load_sp()
         super(SPRNN, self).__init__(dataset, 7, m=m)
 
     @property
@@ -77,7 +77,7 @@ class FSARNN(WhiteBoxRNN):
         """
         self.fsa = fsa
         self.u = m if u is None else u
-        dataset = load_sp(blank=True)
+        dataset = load_sp()
         hidden_size = len(fsa.states) * len(dataset.fields["x"].vocab)
         super(FSARNN, self).__init__(dataset, hidden_size, m=m)
 

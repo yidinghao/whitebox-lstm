@@ -2,7 +2,7 @@ from typing import Tuple
 
 import numpy as np
 
-from data.loaders import load_counter
+from datasets.loaders import load_counter
 from models.whitebox.whitebox import WhiteBoxRNN, Weights
 
 
@@ -19,7 +19,7 @@ class CounterRNN(WhiteBoxRNN):
         :param u: The value used to increment the counter
         """
         self.m2 = m if u is None else u
-        dataset = load_counter(blank=True)
+        dataset = load_counter()
         super(CounterRNN, self).__init__(dataset, 2, m=m)
 
     @property
