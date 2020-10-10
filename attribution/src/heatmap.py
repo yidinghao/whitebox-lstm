@@ -4,7 +4,7 @@ at https://github.com/ArrasL/LRP_for_LSTM/blob/master/code/util/
 heatmap.py. The code has been substantially refactored. I added code to
 make heatmaps in LaTeX.
 """
-from typing import List, Callable, Tuple
+from typing import Callable, List, Tuple
 
 import matplotlib.pyplot as plt
 from yattag import Doc
