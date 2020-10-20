@@ -67,7 +67,7 @@ class FSARNN(WhiteBoxRNN):
     Handmade LSTM based on an FSA.
     """
 
-    def __init__(self, fsa: FSA = sp_fsa, m: float = 50., u: float = None):
+    def __init__(self, fsa: FSA = sp_fsa, m: float = 50., u: float = 1.):
         """
         Constructs the FSA-based SP network.
 
