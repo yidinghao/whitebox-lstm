@@ -3,7 +3,7 @@ This module loads Torchtext fields that are used to tokenize and prepare
 input batches for the white-box models.
 """
 import pickle
-from typing import Callable, List
+from typing import Callable, List, Tuple
 
 import torch
 from torchtext import data as tt
@@ -28,6 +28,20 @@ def _to_one_hot(i: int, vocab: Vocab) -> List[int]:
     return [1 if j == i else 0 for j in range(len(vocab))]
 
 
+def load_fields(filename: str) -> Tuple[tt.Field, tt.Field]:
+    """
+    Loads the fields for a formal language task from a pickled object.
+
+    :param filename: The filename of the pickled fields
+    :return: The input and output fields
+    """
+    with open(filename, "rb") as f:
+        fields = pickle.load(f)
+        add_postprocessing(fields["x"])
+
+    return fields["x"], fields["y"]
+
+
 def load_dataset(task_name: str) -> tt.Dataset:
     """
     Loads the fields for a formal language task and puts them into a
@@ -36,7 +50,7 @@ def load_dataset(task_name: str) -> tt.Dataset:
     :param task_name: counter, sp, or bracket
     :return: A blank dataset with the fields loaded
     """
-    with open("datasets/{}_fields.p".format(task_name), "rb") as f:
+    with open("../datasets/{}_fields.p".format(task_name), "rb") as f:
         fields = pickle.load(f)
         add_postprocessing(fields["x"])
     return tt.Dataset([], fields)

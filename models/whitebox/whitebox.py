@@ -12,25 +12,34 @@ Weights = Tuple[np.ndarray, np.ndarray, np.ndarray]
 
 class WhiteBoxRNN(LSTMClassifier, ABC):
     """
-    Abstract class for a white-box network.
+    Abstract class for implementing a white-box network. A white-box
+    network is defined by implementing _forget_gate, _cell_state_update,
+    _input_gate, _output_gate, and _decoder_weights.
     """
 
-    def __init__(self, dataset: tt.Dataset, hidden_size: int, m: float = 50.,
-                 set_params: bool = True):
-        x_size = len(dataset.fields["x"].vocab)
-        y_size = len(dataset.fields["y"].vocab)
+    def __init__(self, x_field: tt.Field, y_field: tt.Field, hidden_size: int,
+                 m: float = 50.):
+        """
+        WhiteBoxRNN constructor.
+
+        :param x_field: A field used to tokenize model inputs
+        :param y_field: A field used to decode model outputs
+        :param hidden_size: The hidden size of the LSTM
+        :param m: The constant used to saturate gates
+        """
+        x_size = len(x_field.vocab)
+        y_size = len(y_field.vocab)
         super(WhiteBoxRNN, self).__init__(x_size, y_size, hidden_size)
 
         self._m = m
         self._hidden_size = hidden_size
-        self._x_stoi = dataset.fields["x"].vocab.stoi
-        self._y_stoi = dataset.fields["y"].vocab.stoi
+        self._x_stoi = x_field.vocab.stoi
+        self._y_stoi = y_field.vocab.stoi
 
-        self.x_field = dataset.fields["x"]
-        self.y_field = dataset.fields["y"]
+        self.x_field = x_field
+        self.y_field = y_field
 
-        if set_params:
-            self._set_params()
+        self._set_params()
 
     def _set_params(self):
         wfh, wfx, bf = self._forget_gate
@@ -56,42 +65,56 @@ class WhiteBoxRNN(LSTMClassifier, ABC):
     @property
     def _forget_gate(self) -> Weights:
         """
-        By default, set to all 1s
+        Defines the weights for the forget gate. By default, it is set
+        to all 1s.
 
-        :return:
+        :return: W_hh, W_ih, and the bias
         """
-        return (np.zeros((self._hidden_size, self._hidden_size)),
-                np.zeros((self._hidden_size, len(self._x_stoi))),
-                self._m * np.ones(self._hidden_size))
+        return np.zeros((self._hidden_size, self._hidden_size)), \
+               np.zeros((self._hidden_size, len(self._x_stoi))), \
+               self._m * np.ones(self._hidden_size)
 
     @property
     @abstractmethod
     def _cell_state_update(self) -> Weights:
+        """
+        Defines the weights for determining the value added to the cell
+        state at each time step.
+
+        :return: W_hh, W_ih, and the bias
+        """
         raise NotImplementedError("Cell state update undefined")
 
     @property
     def _input_gate(self) -> Weights:
         """
-        By default, set to all 1s
+        Defines the weights for the input gate. By default, it is set to
+        all 1s.
 
-        :return: The input gate
+        :return: W_hh, W_ih, and the bias
         """
-        return (np.zeros((self._hidden_size, self._hidden_size)),
-                np.zeros((self._hidden_size, len(self._x_stoi))),
-                self._m * np.ones(self._hidden_size))
+        return np.zeros((self._hidden_size, self._hidden_size)), \
+               np.zeros((self._hidden_size, len(self._x_stoi))), \
+               self._m * np.ones(self._hidden_size)
 
     @property
     def _output_gate(self) -> Weights:
         """
-        By default, set to all 1s
+        Defines the weights for the output gate. By default, it is set
+        to all 1s.
 
-        :return: The output gate
+        :return: W_hh, W_ih, and the bias
         """
-        return (np.zeros((self._hidden_size, self._hidden_size)),
-                np.zeros((self._hidden_size, len(self._x_stoi))),
-                self._m * np.ones(self._hidden_size))
+        return np.zeros((self._hidden_size, self._hidden_size)), \
+               np.zeros((self._hidden_size, len(self._x_stoi))), \
+               self._m * np.ones(self._hidden_size)
 
     @property
     @abstractmethod
     def _decoder_weights(self) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Defines the weights of the linear decoder.
+
+        :return: The weight matrix and the bias
+        """
         raise NotImplementedError("Decoder undefined")

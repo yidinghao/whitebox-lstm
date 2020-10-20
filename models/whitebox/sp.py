@@ -1,16 +1,18 @@
 from typing import Tuple
 
 import numpy as np
+from torchtext import data as tt
 
-from datasets.loaders import load_sp
+from datasets.loaders import load_fields
 from models.whitebox.whitebox import WhiteBoxRNN, Weights
 from tools.fsa import FSA, sp_fsa
+
+sp_x_field, sp_y_field = load_fields("../datasets/sp_fields.p")
 
 
 class SPRNN(WhiteBoxRNN):
     """
-    Counter-based white-box LSTM for the SP task. The grammar is ab, bc,
-    cd, dc.
+    Counter-based white-box LSTM for the SP task.
     """
 
     def __init__(self, m: float = 50., u: float = .6):
@@ -20,9 +22,8 @@ class SPRNN(WhiteBoxRNN):
         :param m: The constant used to saturate the gates
         :param u: The value used to increment the counter
         """
-        self.u = m if u is None else u
-        dataset = load_sp()
-        super(SPRNN, self).__init__(dataset, 7, m=m)
+        self.u = u
+        super(SPRNN, self).__init__(sp_x_field, sp_y_field, 7, m=m)
 
     @property
     def _cell_state_update(self) -> Weights:
@@ -64,22 +65,26 @@ class SPRNN(WhiteBoxRNN):
 
 class FSARNN(WhiteBoxRNN):
     """
-    Handmade LSTM based on an FSA.
+    A white-box LSTM that implements an FSA. By default, an FSA for the
+    SP task will be implemented. However, any arbitrary FSA can be used.
     """
 
-    def __init__(self, fsa: FSA = sp_fsa, m: float = 50., u: float = 1.):
+    def __init__(self, fsa: FSA = sp_fsa, x_field: tt.Field = sp_x_field,
+                 y_field: tt.Field = sp_y_field, m: float = 50.,
+                 u: float = 1.):
         """
-        Constructs the FSA-based SP network.
+        Constructor for an FSA-based SP network.
 
-        :param fsa: A finite-state automaton for the SP task
+        :param fsa: The FSA that will be implemented
+        :param x_field: The field used to tokenize inputs
+        :param y_field: The field used to decode outputs
         :param m: The constant used to saturate the gates
         :param u: A scaling factor for one-hot vectors
         """
         self.fsa = fsa
-        self.u = m if u is None else u
-        dataset = load_sp()
-        hidden_size = len(fsa.states) * len(dataset.fields["x"].vocab)
-        super(FSARNN, self).__init__(dataset, hidden_size, m=m)
+        self.u = u
+        hidden_size = len(fsa.states) * len(x_field.vocab)
+        super(FSARNN, self).__init__(x_field, y_field, hidden_size, m=m)
 
     @property
     def _forget_gate(self) -> Weights:
