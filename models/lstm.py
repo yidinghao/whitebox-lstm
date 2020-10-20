@@ -10,7 +10,7 @@ from torchtext import data as tt
 
 from models import lrp_modules as lrpnn
 from models.decoder import RNNLinearDecoder
-from tools.data_types import Input, ClassWeights
+from tools.data_types import Input
 
 
 class LSTMClassifier(nn.Module):
@@ -19,8 +19,7 @@ class LSTMClassifier(nn.Module):
     unidirectional LSTM along with a linear decoding layer.
     """
 
-    def __init__(self, input_size: int, output_size: int, hidden_size: int,
-                 num_layers: int = 1, dropout: float = 0.):
+    def __init__(self, input_size: int, output_size: int, hidden_size: int):
         """
         Constructor for an LSTMClassifier.
 
@@ -28,15 +27,11 @@ class LSTMClassifier(nn.Module):
         :param output_size: The size of model outputs
         :param hidden_size: The size of the hidden state and cell state
             vectors
-        :param num_layers: The number of layers of in the LSTM
-        :param dropout: The dropout for the LSTM
         """
         super(LSTMClassifier, self).__init__()
 
         self._lstm = lrpnn.LRPLSTM(input_size=input_size,
                                    hidden_size=hidden_size,
-                                   num_layers=num_layers,
-                                   dropout=dropout,
                                    batch_first=True)
 
         self._decoder = RNNLinearDecoder(hidden_size, output_size)
@@ -96,14 +91,14 @@ class LSTMClassifier(nn.Module):
 
     """ LRP """
 
-    def lrp(self, x: Input, classes: ClassWeights = None,
-            eps: float = 0.001) -> np.ndarray:
+    def lrp(self, x: Input, target: int = None, eps: float = 0.001) -> \
+            np.ndarray:
         """
         Computes relevance scores for an input using LRP.
 
         :param x: A single input, as a batch of size 1
 
-        :param classes: Relevance will be propagated from each index of
+        :param target: Relevance will be propagated from each index of
              the output appearing in this set. If this set is empty,
              then relevance will be propagated from the index with the
              highest logit score
@@ -117,16 +112,11 @@ class LSTMClassifier(nn.Module):
         self._decoder.lrp_forward(self._lstm.lrp_output)
 
         # Initialize relevance
-        if isinstance(classes, int):
-            classes = {classes: 1}
-        elif classes is None or len(classes) == 0:
-            classes = {np.argmax(self._decoder.lrp_output, 0): 1.}
-        elif isinstance(classes, set):
-            classes = {c: 1. for c in classes}
+        if target is None:
+            target = np.argmax(self._decoder.lrp_output, 0)
 
-        rel_y = np.array([classes[c] * self._decoder.lrp_output[c]
-                          if c in classes else 0.
-                          for c in range(len(self._decoder.lrp_output))])
+        rel_y = np.zeros(len(self._decoder.lrp_output))
+        rel_y[target] = self._decoder.lrp_output[target]
 
         # Backward pass
         hidden_size = self._lstm.hidden_size

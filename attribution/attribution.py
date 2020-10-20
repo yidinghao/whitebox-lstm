@@ -3,9 +3,8 @@ from typing import List
 import torch
 from captum.attr import Occlusion
 from torch import nn
-from torchtext import data as tt
 
-from tools.data_types import Input, ClassWeights
+from tools.data_types import Input
 
 
 class AttributionMixin(object):
@@ -18,19 +17,17 @@ class AttributionMixin(object):
             raise TypeError("Can't instantiate an AttributionMixin by itself")
         return object.__new__(cls)
 
-    def __init__(self, model: nn.Module, dataset: tt.Dataset):
+    def __init__(self, model: nn.Module):
         """
         A wrapper around Captum's __init__ function, which supports
         saving the fields of a dataset.
 
         :param model: A model
-        :param dataset: A dataset
         """
         super(AttributionMixin, self).__init__(model)
         self.model = model
-        fields = dataset.fields
-        self.x_field = fields["x"] if "x" in fields else fields["text"]
-        self.y_field = fields["y"] if "y" in fields else fields["label"]
+        self.x_field = self.model.x_field
+        self.y_field = self.model.y_field
         model.eval()
 
     def __call__(self, x_str: str, *args, **kwargs) -> List[float]:
@@ -52,8 +49,8 @@ class AttributionMixin(object):
 class OcclusionAttribution(AttributionMixin, Occlusion):
     name = "Occlusion"
 
-    def __init__(self, model: nn.Module, dataset: tt.Dataset):
-        super(OcclusionAttribution, self).__init__(model, dataset)
+    def __init__(self, model: nn.Module):
+        super(OcclusionAttribution, self).__init__(model)
         self.forward_func = self._forward_func
 
     def _forward_func(self, x_one_hot: torch.Tensor, lengths: torch.Tensor,
@@ -64,27 +61,11 @@ class OcclusionAttribution(AttributionMixin, Occlusion):
         else:
             return y
 
-    def attribute(self, x: Input, target: ClassWeights = None) -> List[float]:
+    def attribute(self, x: Input, target: int = None) -> List[float]:
         if target is None:
             target = int(torch.argmax(self.forward_func(*x)))
 
-        elif isinstance(target, dict):
-            scores = {c: self.attribute(x, target=c) for c in target}
-            final_scores = []
-            for c, score_list in scores.items():
-                weighted_scores = [s * target[c] for s in score_list]
-                if len(final_scores) == 0:
-                    final_scores = weighted_scores
-                else:
-                    for i in range(len(final_scores)):
-                        final_scores[i] += weighted_scores[i]
-
-            return final_scores
-
-        if len(x[0].shape) == 3:
-            window = (1, x[0].shape[2])
-        else:
-            window = (1,)
+        window = (1, x[0].shape[2]) if len(x[0].shape) == 3 else (1,)
         kwargs = dict(target=target, additional_forward_args=x[1])
         rel = super(OcclusionAttribution, self).attribute(x[0], window,
                                                           **kwargs)

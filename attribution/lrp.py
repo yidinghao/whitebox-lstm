@@ -4,7 +4,7 @@ import numpy as np
 from captum.attr import Attribution
 
 from attribution.attribution import AttributionMixin
-from tools.data_types import ClassWeights, Input
+from tools.data_types import Input
 
 
 class LRPAttribution(AttributionMixin, Attribution):
@@ -14,8 +14,8 @@ class LRPAttribution(AttributionMixin, Attribution):
 
     name = "LRP"
 
-    def attribute(self, x: Input, target: ClassWeights = None,
-                  eps: float = 0.001) -> List[float]:
+    def attribute(self, x: Input, target: int = None, eps: float = 0.001) -> \
+            List[float]:
         """
         Computes LRP scores for an input.
 
@@ -24,5 +24,5 @@ class LRPAttribution(AttributionMixin, Attribution):
         :param eps: Stabilizer
         :return: LRP scores for the input
         """
-        lrp_scores = self.forward_func.lrp(x, classes=target, eps=eps)
+        lrp_scores = self.forward_func.lrp(x, target=target, eps=eps)
         return list(np.sum(lrp_scores, 1))
