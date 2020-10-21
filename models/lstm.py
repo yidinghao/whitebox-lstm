@@ -30,9 +30,9 @@ class LSTMClassifier(nn.Module):
         """
         super(LSTMClassifier, self).__init__()
 
-        self._lstm = lrpnn.LRPLSTM(input_size=input_size,
-                                   hidden_size=hidden_size,
-                                   batch_first=True)
+        self.lstm = lrpnn.LRPLSTM(input_size=input_size,
+                                  hidden_size=hidden_size,
+                                  batch_first=True)
 
         self._decoder = RNNLinearDecoder(hidden_size, output_size)
 
@@ -77,7 +77,7 @@ class LSTMClassifier(nn.Module):
                                                  batch_first=True,
                                                  enforce_sorted=False)
 
-        lstm_out_packed, (lstm_out_last, _) = self._lstm(x_packed)
+        lstm_out_packed, (lstm_out_last, _) = self.lstm(x_packed)
         y_hat = self._decoder(lstm_out_last[-1])
 
         if save_output:
@@ -108,8 +108,8 @@ class LSTMClassifier(nn.Module):
         :return: The relevance scores of all components of the input
         """
         x_one_hot = x[0].squeeze(0)
-        self._lstm.lrp_forward(x_one_hot.detach().numpy())
-        self._decoder.lrp_forward(self._lstm.lrp_output)
+        self.lstm.lrp_forward(x_one_hot.detach().numpy())
+        self._decoder.lrp_forward(self.lstm.lrp_output)
 
         # Initialize relevance
         if target is None:
@@ -119,10 +119,10 @@ class LSTMClassifier(nn.Module):
         rel_y[target] = self._decoder.lrp_output[target]
 
         # Backward pass
-        hidden_size = self._lstm.hidden_size
+        hidden_size = self.lstm.hidden_size
         rel_h_last = self._decoder.lrp_backward(rel_y, eps=eps)
 
         rel_h = np.zeros((len(x_one_hot), hidden_size))
         rel_h[-1] = rel_h_last
 
-        return self._lstm.lrp_backward(rel_h, eps=eps)
+        return self.lstm.lrp_backward(rel_h, eps=eps)

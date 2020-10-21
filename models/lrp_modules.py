@@ -46,8 +46,8 @@ class LRPLSTM(nn.LSTM, LRPModule):
         This class keeps the traces of its forward passes as state.
         """
         super(LRPLSTM, self).__init__(*args, **kwargs)
-        self._traces = [None] * self.num_layers
-        self._traces_rev = [None] * self.num_layers
+        self.traces = [None] * self.num_layers
+        self.traces_rev = [None] * self.num_layers
         self._layer_inputs = [None] * self.num_layers
         self._rel_h = None
         self._rel_c = None
@@ -68,10 +68,10 @@ class LRPLSTM(nn.LSTM, LRPModule):
             self._lrp_forward(curr_input, l, 0)
             if self.bidirectional:
                 self._lrp_forward(np.flip(curr_input, 0), l, 1)
-                h_rev = np.flip(self._traces_rev[l][0], 0)
-                curr_input = np.concatenate((self._traces[l][0], h_rev), 1)
+                h_rev = np.flip(self.traces_rev[l][0], 0)
+                curr_input = np.concatenate((self.traces[l][0], h_rev), 1)
             else:
-                curr_input = self._traces[l][0]
+                curr_input = self.traces[l][0]
 
     def lrp_backward(self, rel_y: np.ndarray,
                      eps: float = 0.001) -> np.ndarray:
@@ -111,10 +111,10 @@ class LRPLSTM(nn.LSTM, LRPModule):
     @property
     def lrp_output(self):
         if self.bidirectional:
-            return np.concatenate((self._traces[-1][0][-1],
-                                   self._traces_rev[-1][0][-1]))
+            return np.concatenate((self.traces[-1][0][-1],
+                                   self.traces_rev[-1][0][-1]))
         else:
-            return self._traces[-1][0][-1]
+            return self.traces[-1][0][-1]
 
     """ Helper Functions """
 
@@ -133,10 +133,10 @@ class LRPLSTM(nn.LSTM, LRPModule):
         """
         if direction == 1:
             x = np.flip(self._layer_inputs[layer], 0)
-            h, c, i, f, g, g_pre, w_ig, w_hg = self._traces_rev[layer]
+            h, c, i, f, g, g_pre, w_ig, w_hg = self.traces_rev[layer]
         else:
             x = self._layer_inputs[layer]
-            h, c, i, f, g, g_pre, w_ig, w_hg = self._traces[layer]
+            h, c, i, f, g, g_pre, w_ig, w_hg = self.traces[layer]
 
         # Initialize
         rel_h = np.zeros((h.shape[0] + 1, h.shape[1]))
@@ -204,10 +204,10 @@ class LRPLSTM(nn.LSTM, LRPModule):
 
         # Save trace to state
         if direction == 1:
-            self._traces_rev[layer] = h, c, i, f, g, g_pre, w_ig, w_hg
+            self.traces_rev[layer] = h, c, i, f, g, g_pre, w_ig, w_hg
         else:
             self._layer_inputs[layer] = x
-            self._traces[layer] = h, c, i, f, g, g_pre, w_ig, w_hg
+            self.traces[layer] = h, c, i, f, g, g_pre, w_ig, w_hg
 
     """ Helper Function """
 
