@@ -29,17 +29,17 @@ class SPRNN(WhiteBoxRNN):
     def _cell_state_update(self) -> Weights:
         wch = np.zeros((self._hidden_size, self._hidden_size))
         bc = np.zeros(self._hidden_size)
-        wcx = np.zeros((self._hidden_size, len(self._x_stoi)))
+        wcx = np.zeros((self._hidden_size, len(self.x_stoi)))
         for i, s in enumerate(["a", "b", "c", "d"]):
-            wcx[i, self._x_stoi[s]] = self.u
+            wcx[i, self.x_stoi[s]] = self.u
             if s != "a":
-                wcx[i + 3, self._x_stoi[s]] = self.u
+                wcx[i + 3, self.x_stoi[s]] = self.u
 
         return wch, wcx, bc
 
     @property
     def _input_gate(self) -> Weights:
-        wix = np.zeros((self._hidden_size, len(self._x_stoi)))
+        wix = np.zeros((self._hidden_size, len(self.x_stoi)))
         wih = np.zeros((self._hidden_size, self._hidden_size))
         wih[4, 0] = 2 * self._m
         wih[5, 1] = 2 * self._m
@@ -54,11 +54,11 @@ class SPRNN(WhiteBoxRNN):
 
     @property
     def _decoder_weights(self) -> Tuple[np.ndarray, np.ndarray]:
-        w = np.zeros((len(self._y_stoi), self._hidden_size))
-        w[self._y_stoi["False"], 4:] = 1.
+        w = np.zeros((len(self.y_stoi), self._hidden_size))
+        w[self.y_stoi["False"], 4:] = 1.
 
-        b = np.zeros((len(self._y_stoi)))
-        b[self._y_stoi["True"]] = np.tanh(np.tanh(self.u)) / 20
+        b = np.zeros((len(self.y_stoi)))
+        b[self.y_stoi["True"]] = np.tanh(np.tanh(self.u)) / 20
 
         return w, b
 
@@ -94,24 +94,24 @@ class FSARNN(WhiteBoxRNN):
         :return:
         """
         return (np.zeros((self._hidden_size, self._hidden_size)),
-                np.zeros((self._hidden_size, len(self._x_stoi))),
+                np.zeros((self._hidden_size, len(self.x_stoi))),
                 -self._m * np.ones(self._hidden_size))
 
     @property
     def _cell_state_update(self) -> Weights:
         wch = np.zeros((self._hidden_size, self._hidden_size))
         bc = np.zeros(self._hidden_size)
-        wcx = self.u * np.tile(np.identity(len(self._x_stoi)),
+        wcx = self.u * np.tile(np.identity(len(self.x_stoi)),
                                (len(self.fsa.states), 1))
 
         return wch, wcx, bc
 
     def _get_cell_position(self, state: int, symbol: str) -> int:
-        return state * len(self._x_stoi) + self._x_stoi[symbol]
+        return state * len(self.x_stoi) + self.x_stoi[symbol]
 
     @property
     def _input_gate(self) -> Weights:
-        wix = np.zeros((self._hidden_size, len(self._x_stoi)))
+        wix = np.zeros((self._hidden_size, len(self.x_stoi)))
 
         # First define bias: what happens when h_{t - 1} == 0
         bi = -self._m * np.ones(self._hidden_size)
@@ -126,17 +126,17 @@ class FSARNN(WhiteBoxRNN):
             r = self._get_cell_position(q, a)
             wih[r, p] = self._m - bi[r]
 
-        wih = wih.repeat(len(self._x_stoi), axis=1)
+        wih = wih.repeat(len(self.x_stoi), axis=1)
 
         return wih, wix, bi
 
     @property
     def _decoder_weights(self) -> Tuple[np.ndarray, np.ndarray]:
-        w = np.zeros((len(self._y_stoi), len(self.fsa.states)))
-        w[self._y_stoi["False"], -1] = 1.
-        w[self._y_stoi["True"], :-1] = 1.
-        w = w.repeat(len(self._x_stoi), axis=1)
+        w = np.zeros((len(self.y_stoi), len(self.fsa.states)))
+        w[self.y_stoi["False"], -1] = 1.
+        w[self.y_stoi["True"], :-1] = 1.
+        w = w.repeat(len(self.x_stoi), axis=1)
 
-        b = np.zeros((len(self._y_stoi)))
+        b = np.zeros((len(self.y_stoi)))
 
         return w, b

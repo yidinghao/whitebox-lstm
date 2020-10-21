@@ -33,8 +33,8 @@ class WhiteBoxRNN(LSTMClassifier, ABC):
 
         self._m = m
         self._hidden_size = hidden_size
-        self._x_stoi = x_field.vocab.stoi
-        self._y_stoi = y_field.vocab.stoi
+        self.x_stoi = x_field.vocab.stoi
+        self.y_stoi = y_field.vocab.stoi
 
         self.x_field = x_field
         self.y_field = y_field
@@ -71,7 +71,7 @@ class WhiteBoxRNN(LSTMClassifier, ABC):
         :return: W_hh, W_ih, and the bias
         """
         return np.zeros((self._hidden_size, self._hidden_size)), \
-               np.zeros((self._hidden_size, len(self._x_stoi))), \
+               np.zeros((self._hidden_size, len(self.x_stoi))), \
                self._m * np.ones(self._hidden_size)
 
     @property
@@ -94,7 +94,7 @@ class WhiteBoxRNN(LSTMClassifier, ABC):
         :return: W_hh, W_ih, and the bias
         """
         return np.zeros((self._hidden_size, self._hidden_size)), \
-               np.zeros((self._hidden_size, len(self._x_stoi))), \
+               np.zeros((self._hidden_size, len(self.x_stoi))), \
                self._m * np.ones(self._hidden_size)
 
     @property
@@ -106,7 +106,7 @@ class WhiteBoxRNN(LSTMClassifier, ABC):
         :return: W_hh, W_ih, and the bias
         """
         return np.zeros((self._hidden_size, self._hidden_size)), \
-               np.zeros((self._hidden_size, len(self._x_stoi))), \
+               np.zeros((self._hidden_size, len(self.x_stoi))), \
                self._m * np.ones(self._hidden_size)
 
     @property

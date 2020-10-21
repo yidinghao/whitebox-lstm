@@ -26,18 +26,18 @@ class CounterRNN(WhiteBoxRNN):
     def _cell_state_update(self) -> Weights:
         wch = np.zeros((self._hidden_size, self._hidden_size))
         bc = np.zeros(self._hidden_size)
-        wcx = np.zeros((self._hidden_size, len(self._x_stoi)))
-        wcx[0, self._x_stoi["a"]] = self.u
-        wcx[0, self._x_stoi["b"]] = -self.u
+        wcx = np.zeros((self._hidden_size, len(self.x_stoi)))
+        wcx[0, self.x_stoi["a"]] = self.u
+        wcx[0, self.x_stoi["b"]] = -self.u
 
         return wch, wcx, bc
 
     @property
     def _decoder_weights(self) -> Tuple[np.ndarray, np.ndarray]:
-        w = np.zeros((len(self._y_stoi), self._hidden_size))
-        w[self._y_stoi["True"], 0] = 1.
+        w = np.zeros((len(self.y_stoi), self._hidden_size))
+        w[self.y_stoi["True"], 0] = 1.
 
-        b = np.zeros((len(self._y_stoi)))
-        b[self._y_stoi["False"]] = np.tanh(np.tanh(self.u)) / 2
+        b = np.zeros((len(self.y_stoi)))
+        b[self.y_stoi["False"]] = np.tanh(np.tanh(self.u)) / 2
 
         return w, b
