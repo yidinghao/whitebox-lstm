@@ -1,6 +1,7 @@
 """
 This is an architecture for a standard unidirectional LSTM classifier.
 """
+from typing import Tuple
 
 import numpy as np
 import torch
@@ -10,7 +11,8 @@ from torchtext import data as tt
 
 from models import lrp_modules as lrpnn
 from models.decoder import RNNLinearDecoder
-from tools.data_types import Input
+
+Input = Tuple[torch.Tensor, torch.Tensor]
 
 
 class LSTMClassifier(nn.Module):

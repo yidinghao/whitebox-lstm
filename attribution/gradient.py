@@ -1,12 +1,13 @@
 import warnings
-from typing import List
+from typing import List, Tuple
 
 import torch
 import torch.nn as nn
 from captum.attr import IntegratedGradients, InputXGradient, Saliency
 
 from attribution.attribution import AttributionMixin
-from tools.data_types import Input, ClassWeights
+
+Input = Tuple[torch.Tensor, torch.Tensor]
 
 
 class GradientMixin(AttributionMixin):
@@ -59,6 +60,6 @@ class SaliencyAttribution(GradientMixin, Saliency):
     """
     name = "Saliency"
 
-    def attribute(self, x: Input, target: ClassWeights = None) -> List[float]:
+    def attribute(self, x: Input, target: int = None) -> List[float]:
         return super(SaliencyAttribution, self).attribute(x, target=target,
                                                           abs=False)

@@ -1,10 +1,12 @@
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
+import torch
 from captum.attr import Attribution
 
 from attribution.attribution import AttributionMixin
-from tools.data_types import Input
+
+Input = Tuple[torch.Tensor, torch.Tensor]
 
 
 class LRPAttribution(AttributionMixin, Attribution):

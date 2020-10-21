@@ -1,10 +1,10 @@
-from typing import List
+from typing import List, Tuple
 
 import torch
 from captum.attr import Occlusion
 from torch import nn
 
-from tools.data_types import Input
+Input = Tuple[torch.Tensor, torch.Tensor]
 
 
 class AttributionMixin(object):
