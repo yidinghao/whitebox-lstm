@@ -5,7 +5,7 @@ from torchtext import data as tt
 
 from datasets.loaders import load_fields
 from models.whitebox.whitebox import WhiteBoxRNN, Weights
-from tools.fsa import FSA, sp_fsa
+from fsa import FSA, sp_fsa
 
 sp_x_field, sp_y_field = load_fields("datasets/sp_fields.p")
 

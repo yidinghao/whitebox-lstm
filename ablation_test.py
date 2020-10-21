@@ -2,16 +2,13 @@
 This is the script for running the SP task ablation test.
 """
 import random
-from typing import Dict, Set, Union
+from typing import Dict, List, Set, Union
 
 import numpy as np
 
-from attribution.attribution import *
-from attribution.gradient import *
-from attribution.lrp import LRPAttribution
-from models.whitebox.sp import SPRNN, FSARNN
-from models.whitebox.whitebox import WhiteBoxRNN
-from tools.fsa import sp_fsa
+from attribution import *
+from fsa import sp_fsa
+from models.whitebox import WhiteBoxRNN, SPRNN, FSARNN
 
 
 def _check_subseqs(letters: Union[Set[str], str], suffix: str) -> bool:

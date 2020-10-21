@@ -8,8 +8,8 @@ import csv
 
 import numpy as np
 
-from attribution.lrp import LRPAttribution
-from models.whitebox.counter import CounterRNN
+from attribution import LRPAttribution
+from models.whitebox import CounterRNN
 
 
 def _zero_point(x: str) -> int:
