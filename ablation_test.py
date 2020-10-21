@@ -129,42 +129,70 @@ def ablation_test(model: WhiteBoxRNN) -> Dict[str, List[float]]:
     attrs = [occ, ig, sal, gi, lrp]
 
     results = {a.name: [] for a in attrs}
-    with open("../datasets/ablation_test_data.txt", "r") as f:
+    with open("datasets/ablation_test_data.txt", "r") as f:
         for line in f:
             x = line.strip()
+            print(x)
+            print("Length:", len(x))
+
             for a in attrs:
                 score = attr_ablation(x, a)
-                results[a.name].append(score / len(x))
+                percentage = score / len(x) * 100
+                results[a.name].append(percentage)
+                print("{}: {} ({:.1f}%)".format(a.name, score, percentage))
+            print()
 
     return results
 
 
+def print_results(results: Dict[str, List[float]]):
+    for a, scores in results.items():
+        mean = np.mean(scores)
+        stdev = np.std(scores)
+        print("{}: mean {:.1f}%, stdev {:.1f}%".format(a, mean, stdev))
+    print()
+
+
 if __name__ == "__main__":
     # Test attribution methods for both models
-    attr_results = dict(Counter=ablation_test(SPRNN()),
-                        FSA=ablation_test(FSARNN(u=.5)))
+    print("Testing counter-based SP network\n")
+    counter_results = ablation_test(SPRNN())
+    print_results(counter_results)
 
-    for model, results in attr_results.items():
-        print("{} Network Results".format(model))
-        for a, scores in results.items():
-            mean = np.mean(scores)
-            stdev = np.std(scores)
-            print("{}: mean {}, stdev {}".format(a, mean, stdev))
-        print()
+    print("Testing FSA-based SP network\n")
+    fsa_results = ablation_test(FSARNN(u=.5))
+    print_results(counter_results)
 
-    # Optimal and random baseline
-    optimal_results = []
-    random_results = []
+    # Optimal and random baselines
+    baseline_results = dict(Optimal=[], Random=[])
+    print("Testing optimal and random baselines\n")
     with open("datasets/ablation_test_data.txt", "r") as f:
         for line in f:
             x = line.strip()
-            optimal_results.append(optimal_ablation(x) / len(x))
-            random_results.append(random_ablation(x) / len(x))
+            print(x)
+            print("Length:", len(x))
 
-    optimal_mean = np.mean(optimal_results)
-    optimal_stdev = np.std(optimal_results)
-    print("Random: {}, {}".format(optimal_mean, optimal_stdev))
+            optimal_score = optimal_ablation(x)
+            optimal_percentage = optimal_score / len(x) * 100
+            print("Optimal: {} ({:.1f}%)".format(optimal_score,
+                                                 optimal_percentage))
 
-    rand_mean = np.mean(random_results)
-    rand_stdev = np.std(random_results)
-    print("Random: {}, {}".format(rand_mean, rand_stdev))
+            random_score = random_ablation(x)
+            random_percentage = random_score / len(x) * 100
+            print("Random: {} ({:.1f}%)\n".format(random_score,
+                                                  random_percentage))
+
+            baseline_results["Optimal"].append(optimal_percentage)
+            baseline_results["Random"].append(random_percentage)
+
+    print_results(baseline_results)
+
+    # Summary
+    print("Summary\n\nCounter:")
+    print_results(counter_results)
+
+    print("FSA:")
+    print_results(fsa_results)
+
+    print("Baselines:")
+    print_results(baseline_results)
