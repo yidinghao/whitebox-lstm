@@ -40,29 +40,3 @@ def load_fields(filename: str) -> Tuple[tt.Field, tt.Field]:
         add_postprocessing(fields["x"])
 
     return fields["x"], fields["y"]
-
-
-def load_dataset(task_name: str) -> tt.Dataset:
-    """
-    Loads the fields for a formal language task and puts them into a
-    blank Dataset.
-
-    :param task_name: counter, sp, or bracket
-    :return: A blank dataset with the fields loaded
-    """
-    with open("../datasets/{}_fields.p".format(task_name), "rb") as f:
-        fields = pickle.load(f)
-        add_postprocessing(fields["x"])
-    return tt.Dataset([], fields)
-
-
-def load_sp() -> tt.Dataset:
-    return load_dataset("sp")
-
-
-def load_counter() -> tt.Dataset:
-    return load_dataset("counter")
-
-
-def load_bracket() -> tt.Dataset:
-    return load_dataset("bracket")
