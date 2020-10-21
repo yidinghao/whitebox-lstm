@@ -123,7 +123,7 @@ def ablation_test(model: WhiteBoxRNN) -> Dict[str, List[float]]:
     gi = GxIAttribution(model)
     ig = IGAttribution(model)
     lrp = LRPAttribution(model)
-    attrs = [occ, ig, sal, gi, lrp]
+    attrs = [occ, sal, gi, ig, lrp]
 
     results = {a.name: [] for a in attrs}
     with open("datasets/ablation_test_data.txt", "r") as f:
