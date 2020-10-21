@@ -21,7 +21,7 @@ class BracketRNN(WhiteBoxRNN):
         :param m: The value used to saturate the gates
         """
         self._stack_size = stack_size
-        fields = load_fields("../datasets/bracket_fields.p")
+        fields = load_fields("datasets/bracket_fields.p")
         super(BracketRNN, self).__init__(*fields, 2 * stack_size + 2, m=m)
 
     @property

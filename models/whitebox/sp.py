@@ -7,7 +7,7 @@ from datasets.loaders import load_fields
 from models.whitebox.whitebox import WhiteBoxRNN, Weights
 from tools.fsa import FSA, sp_fsa
 
-sp_x_field, sp_y_field = load_fields("../datasets/sp_fields.p")
+sp_x_field, sp_y_field = load_fields("datasets/sp_fields.p")
 
 
 class SPRNN(WhiteBoxRNN):
@@ -15,7 +15,7 @@ class SPRNN(WhiteBoxRNN):
     Counter-based white-box LSTM for the SP task.
     """
 
-    def __init__(self, m: float = 50., u: float = .6):
+    def __init__(self, m: float = 50., u: float = .7):
         """
         Constructs the counter-based SP network.
 

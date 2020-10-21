@@ -19,7 +19,7 @@ class CounterRNN(WhiteBoxRNN):
         :param u: The value used to increment the counter
         """
         self.u = m if u is None else u
-        fields = load_fields("../datasets/counter_fields.p")
+        fields = load_fields("datasets/counter_fields.p")
         super(CounterRNN, self).__init__(*fields, 2, m=m)
 
     @property
