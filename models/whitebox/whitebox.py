@@ -31,7 +31,7 @@ class WhiteBoxRNN(LSTMClassifier, ABC):
         y_size = len(y_field.vocab)
         super(WhiteBoxRNN, self).__init__(x_size, y_size, hidden_size)
 
-        self._m = m
+        self.m = m
         self._hidden_size = hidden_size
         self.x_stoi = x_field.vocab.stoi
         self.y_stoi = y_field.vocab.stoi
@@ -72,7 +72,7 @@ class WhiteBoxRNN(LSTMClassifier, ABC):
         """
         return np.zeros((self._hidden_size, self._hidden_size)), \
                np.zeros((self._hidden_size, len(self.x_stoi))), \
-               self._m * np.ones(self._hidden_size)
+               self.m * np.ones(self._hidden_size)
 
     @property
     @abstractmethod
@@ -95,7 +95,7 @@ class WhiteBoxRNN(LSTMClassifier, ABC):
         """
         return np.zeros((self._hidden_size, self._hidden_size)), \
                np.zeros((self._hidden_size, len(self.x_stoi))), \
-               self._m * np.ones(self._hidden_size)
+               self.m * np.ones(self._hidden_size)
 
     @property
     def _output_gate(self) -> Weights:
@@ -107,7 +107,7 @@ class WhiteBoxRNN(LSTMClassifier, ABC):
         """
         return np.zeros((self._hidden_size, self._hidden_size)), \
                np.zeros((self._hidden_size, len(self.x_stoi))), \
-               self._m * np.ones(self._hidden_size)
+               self.m * np.ones(self._hidden_size)
 
     @property
     @abstractmethod

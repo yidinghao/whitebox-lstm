@@ -41,14 +41,14 @@ class SPRNN(WhiteBoxRNN):
     def _input_gate(self) -> Weights:
         wix = np.zeros((self._hidden_size, len(self.x_stoi)))
         wih = np.zeros((self._hidden_size, self._hidden_size))
-        wih[4, 0] = 2 * self._m
-        wih[5, 1] = 2 * self._m
-        wih[5, 3] = 2 * self._m
-        wih[6, 2] = 2 * self._m
+        wih[4, 0] = 2 * self.m
+        wih[5, 1] = 2 * self.m
+        wih[5, 3] = 2 * self.m
+        wih[6, 2] = 2 * self.m
 
         bi = np.empty(self._hidden_size)
-        bi[:4] = self._m
-        bi[4:] = -self._m
+        bi[:4] = self.m
+        bi[4:] = -self.m
 
         return wih, wix, bi
 
@@ -95,7 +95,7 @@ class FSARNN(WhiteBoxRNN):
         """
         return (np.zeros((self._hidden_size, self._hidden_size)),
                 np.zeros((self._hidden_size, len(self.x_stoi))),
-                -self._m * np.ones(self._hidden_size))
+                -self.m * np.ones(self._hidden_size))
 
     @property
     def _cell_state_update(self) -> Weights:
@@ -114,17 +114,17 @@ class FSARNN(WhiteBoxRNN):
         wix = np.zeros((self._hidden_size, len(self.x_stoi)))
 
         # First define bias: what happens when h_{t - 1} == 0
-        bi = -self._m * np.ones(self._hidden_size)
+        bi = -self.m * np.ones(self._hidden_size)
         for p, a, q in self.fsa.transitions:
             if p == 0:
-                bi[self._get_cell_position(q, a)] = self._m
+                bi[self._get_cell_position(q, a)] = self.m
 
         # Then initialize weight based on bias
         wih = np.empty((self._hidden_size, len(self.fsa.states)))
-        wih[:] = -self._m - np.expand_dims(bi, axis=1)
+        wih[:] = -self.m - np.expand_dims(bi, axis=1)
         for p, a, q in self.fsa.transitions:
             r = self._get_cell_position(q, a)
-            wih[r, p] = self._m - bi[r]
+            wih[r, p] = self.m - bi[r]
 
         wih = wih.repeat(len(self.x_stoi), axis=1)
 

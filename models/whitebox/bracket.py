@@ -31,16 +31,16 @@ class BracketRNN(WhiteBoxRNN):
         wfh = np.zeros((self._hidden_size, self._hidden_size))
         wfh[:n, n:2 * n] = self._a_up
         wfh[n:2 * n, n:2 * n] = self._a
-        wfh *= (-2. * self._m)
+        wfh *= (-2. * self.m)
 
         wfx = np.zeros((self._hidden_size, len(self.x_stoi)))
         wfx[:2 * n, self.x_stoi["("]] = np.ones(2 * n)
         wfx[:2 * n, self.x_stoi["["]] = np.ones(2 * n)
-        wfx *= (2. * self._m)
+        wfx *= (2. * self.m)
 
         bf = np.ones(self._hidden_size)
-        bf[:2 * n] *= self._m
-        bf[2 * n:] *= -self._m
+        bf[:2 * n] *= self.m
+        bf[2 * n:] *= -self.m
 
         return wfh, wfx, bf
 
@@ -52,7 +52,7 @@ class BracketRNN(WhiteBoxRNN):
         wch[:n, -2] = np.ones(n)
         wch[-2, :n] = np.array([2. ** (i + 1.) for i in range(n)])
         wch[-1, n:2 * n] = -np.tanh(1.) * np.ones(n)
-        wch *= self._m / np.tanh(1.)
+        wch *= self.m / np.tanh(1.)
 
         wcx = np.zeros((self._hidden_size, len(self.x_stoi)))
         wcx[n:2 * n, self.x_stoi["("]] = np.ones(n)
@@ -61,10 +61,10 @@ class BracketRNN(WhiteBoxRNN):
         wcx[-2, self.x_stoi["["]] = -(2. ** (n + 1))
         wcx[-1, self.x_stoi["("]] = -2.
         wcx[-1, self.x_stoi["["]] = -2.
-        wcx *= self._m
+        wcx *= self.m
 
         bc = np.zeros(self._hidden_size)
-        bc[-1] = 1.5 * self._m
+        bc[-1] = 1.5 * self.m
 
         return wch, wcx, bc
 
@@ -75,18 +75,18 @@ class BracketRNN(WhiteBoxRNN):
         wih = np.zeros((self._hidden_size, self._hidden_size))
         wih[:n, n:2 * n] = self._a
         wih[n:2 * n, n:2 * n] = self._a_down
-        wih *= (2. * self._m)
+        wih *= (2. * self.m)
 
         wix = np.zeros((self._hidden_size, len(self.x_stoi)))
         wix[:n, self.x_stoi[")"]] = 2. * np.ones(n)
         wix[:n, self.x_stoi["]"]] = 2. * np.ones(n)
         wix[n, self.x_stoi["("]] = -2.
         wix[n, self.x_stoi["["]] = -2.
-        wix *= -self._m
+        wix *= -self.m
 
         bi = np.ones(self._hidden_size)
         bi[-2:] = np.array([-1., -1.])
-        bi *= -self._m
+        bi *= -self.m
 
         return wih, wix, bi
 
@@ -94,7 +94,7 @@ class BracketRNN(WhiteBoxRNN):
     def _output_gate(self) -> Weights:
         woh = np.zeros((self._hidden_size, self._hidden_size))
         wox = np.zeros((self._hidden_size, len(self.x_stoi)))
-        bo = self._m * np.ones(self._hidden_size)
+        bo = self.m * np.ones(self._hidden_size)
         return woh, wox, bo
 
     @property
