@@ -53,10 +53,10 @@ class WhiteBoxRNN(LSTMClassifier, ABC):
         bh_tensor = torch.tensor(np.concatenate([bi, bf, bc, bo]))
 
         state_dict = self.state_dict().copy()
-        state_dict["_lstm.weight_hh_l0"] = wh_tensor
-        state_dict["_lstm.weight_ih_l0"] = wx_tensor
-        state_dict["_lstm.bias_hh_l0"] = bh_tensor
-        state_dict["_lstm.bias_ih_l0"] = torch.zeros(4 * self._hidden_size)
+        state_dict["lstm.weight_hh_l0"] = wh_tensor
+        state_dict["lstm.weight_ih_l0"] = wx_tensor
+        state_dict["lstm.bias_hh_l0"] = bh_tensor
+        state_dict["lstm.bias_ih_l0"] = torch.zeros(4 * self._hidden_size)
         state_dict["_decoder._linear.weight"] = torch.tensor(w)
         state_dict["_decoder._linear.bias"] = torch.tensor(b)
 
